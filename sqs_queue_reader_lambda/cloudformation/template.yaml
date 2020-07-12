@@ -1,0 +1,71 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: "Lambda processing messages in SQS queue."
+Parameters:
+  WatsonApiKey:
+    Type: AWS::SSM::Parameter::Value<String>
+    Description: "Watson API KEY"
+    Default: 'watsonapikey'
+
+Resources:
+  MySQSQueueFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.lambda_handler
+      Runtime: python3.8
+      CodeUri: ../src
+      Role: !GetAtt MySQSQueueFunctionLambdaRole.Arn
+      Environment:
+        Variables:
+          WATSON_APIKEY : !Ref WatsonApiKey
+      Timeout: 60
+      Events:
+        JiraIssuesQueue:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt JiraIssuesQueue.Arn
+            BatchSize: 10
+
+  JiraIssuesQueue:
+    Type: AWS::SQS::Queue
+
+
+  MySQSQueueFunctionLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      RoleName: sqs_function_role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: sqs_function_role_log_policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:CreateLogGroup
+                  - logs:PutLogEvents
+                Resource:
+                  - arn:aws:logs:*:*:*
+        - PolicyName: sqs_function_role_ddb_policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: "dynamodb:*"
+                Resource: "*"
+        - PolicyName: sqs_function_role_sqs_policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: "sqs:*"
+                Resource: !GetAtt JiraIssuesQueue.Arn

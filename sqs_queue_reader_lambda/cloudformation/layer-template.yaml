@@ -1,0 +1,14 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: "layer 1"
+
+Resources:
+
+  LayerForLambda:
+    Type: 'AWS::Serverless::LayerVersion'
+    Properties:
+      CompatibleRuntimes:
+        - python3.8
+      ContentUri: python_deps/
+      Description: "Atlassian Lambda deps"
+      LayerName: "atlassian_lambda_deps_layer"

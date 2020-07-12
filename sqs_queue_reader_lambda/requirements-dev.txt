@@ -1,0 +1,8 @@
+jira
+pytz
+pandas
+wordcloud
+ibm_watson
+matplotlib
+networkx
+boto3
