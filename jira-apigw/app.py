@@ -83,20 +83,20 @@ def get_related_users(jira_server_name, project_key, current_issue_key):
         for issue_key in issues:
             assignee = issue_assignee_map[issue_key]
             if assignee in users:
-                users_and_related_issues.setdefault(assignee, [])
-                users_and_related_issues[assignee].append(issue_key)
+                users_and_related_issues.setdefault(assignee, set())
+                users_and_related_issues[assignee].add(issue_key)
 
     # Prepare the list that needs to be returned
     users_final = []
     sorted_users_and_related_issues = sorted(users_and_related_issues.items(), key=lambda x: len(x[1]), reverse=True)
     for user, issues in sorted_users_and_related_issues:
-        issues = users_and_related_issues[user]
+        issues_list = list(issues)
         users_final.append({
             'assignee': user,
             'assignee_account_url': assignee_details_map[user]['assignee_account_url'],
             'assignee_account_avatar': assignee_details_map[user]['assignee_avatar_url'],
-            'issues_url': "https://{0}/browse/{1}?jql=key in ('{2}') order by key".format(jira_server_name, issues[0], "','".join(issues)),
-            'issues': issues,
+            'issues_url': "https://{0}/browse/{1}?jql=key in ('{2}') order by key".format(jira_server_name, issues_list[0], "','".join(issues_list)),
+            'issues': issues_list,
         })
 
     # Return the top 10 keywords and the top 3 users
