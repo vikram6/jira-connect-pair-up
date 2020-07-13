@@ -51,30 +51,11 @@ export default function routes(app, addon, cors) {
                 projects: projects
             });
         })
-
-
-
     });
 
-
-    app.get('/project-details', addon.checkValidToken(), (req, res, next) => {
-        // Rendering a template is easy; the render method takes two params:
-        // name of template and a json objgect to pass the context in.
-        const projectKey = req.query.key;
-        res.render('project-details-charts', {
-            ProjectName: projectKey
-        });
-
-
-    });
 
     app.get('/suggestion-panel', addon.authenticate(), (req, res, next) => {
-        // Rendering a template is easy; the render method takes two params:
-        // name of template and a json objgect to pass the context in.
-        console.log("-----------");
-        console.log(req.query);
-        console.log("-----------");
-
+        
         res.render('suggestion-panel', {
             ProjectName: "projectKey"
         });
@@ -106,26 +87,7 @@ export default function routes(app, addon, cors) {
     });
 
 
-    app.get('/project-word-counts', addon.checkValidToken(), (req, res, next) => {
-        // Rendering a template is easy; the render method takes two params:
-        // name of template and a json object to pass the context in.
-        const projectKey = req.query.key;
-
-        (async () => {
-            try {
-                const response = await got('https://941yp9qwxc.execute-api.us-east-1.amazonaws.com/api/keywords?jira_server_name=diversegorgon.atlassian.net&api_key=foo&projects=' + projectKey);
-
-                let resp = JSON.parse(response.body)
-                // const transformedOutput = transformForOutput(resp)
-                res.json(resp);
-                //=> '<!doctype html> ...'
-            } catch (error) {
-                next(error)
-                //=> 'Internal server error ...'
-            }
-        })();
-
-    });
+    
 
 
     app.get('/execute-full-load', addon.checkValidToken(), (req, res) => {
@@ -206,43 +168,6 @@ export default function routes(app, addon, cors) {
 
 
 
-    //SAMPLE TO TEST OUT AJAX REQUEST
-    app.get('/test', cors(), (req, res, next) => {
-        // Rendering a template is easy; the render method takes two params:
-        // name of template and a json object to pass the context in.
-        // (async () => {
-        //     try {
-        //         const response = await got('https://941yp9qwxc.execute-api.us-east-1.amazonaws.com/api/keywords?jira_server_name=diversegorgon.atlassian.net&api_key=foo');
-
-        //         let resp = JSON.parse(response.body)
-        //         res.render('hello-world-test', {
-        //             title: 'Project Analysis',
-        //             projects: Object.keys(resp),
-        //             projectData: encodeURIComponent(JSON.stringify(transformForOutput(resp)))
-        //             //issueId: req.query['issueId ']
-        //         });
-        //         //=> '<!doctype html> ...'
-        //     } catch (error) {
-        //         next(error)
-        //         //=> 'Internal server error ...'
-        //     }
-        // })();
-        const projectKey = "BAD";
-        (async () => {
-            try {
-                const response = await got('https://941yp9qwxc.execute-api.us-east-1.amazonaws.com/api/keywords?jira_server_name=diversegorgon.atlassian.net&api_key=foo&projects=' + projectKey);
-
-                let resp = JSON.parse(response.body)
-                const transformedOutput = transformForOutput(resp)
-                console.log(transformedOutput);
-                res.json(transformedOutput);
-                //=> '<!doctype html> ...'
-            } catch (error) {
-                next(error)
-                //=> 'Internal server error ...'
-            }
-        })();
-
-    });
+    
     // Add additional route handlers here...
 }

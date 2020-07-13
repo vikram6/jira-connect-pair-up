@@ -1,4 +1,4 @@
-import { config, SQS, CloudFormation } from "aws-sdk";
+import { config, SQS } from "aws-sdk";
 config.update({ region: "us-east-1" });
 var sqs = new SQS();
 
