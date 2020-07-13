@@ -2,10 +2,12 @@ from chalice import Chalice, BadRequestError, UnauthorizedError
 from chalicelib.utils.ddb_service import DDB
 from chalicelib.utils import network_utils
 from boto3.dynamodb.conditions import Key
+import boto3
 
-from dateutil.relativedelta import relativedelta
-from datetime import datetime
-import pprint
+
+ssm = boto3.client('ssm')
+parameter = ssm.get_parameter(Name='jiraapigwkey', WithDecryption=True)
+VALID_API_KEY = parameter['Parameter']['Value']
 
 
 app = Chalice(app_name='jira-apigw')
@@ -105,172 +107,15 @@ def get_related_users(jira_server_name, project_key, current_issue_key):
     return users_final, text_keywords
 
 
-@app.route('/keywords', cors=True)
-def keywords():
-    params = app.current_request.query_params or {}
-    print(params)
-    jira_server_name = params.get('jira_server_name')
-    api_key = params.get('api_key')
-    validate_params(jira_server_name, api_key)
-    date_range = params.get('date_range')
-    date_range_arg = get_date_range_arg(date_range)
-
-    projects = params.get('projects')
-    projects_list = projects.split(',') if projects else []
-    if projects_list:
-        keywords_by_proj = get_keywords(jira_server_name, projects_list, date_range_arg)
-    else:
-        keywords_by_proj = get_keywords_scan(jira_server_name, date_range_arg)
-
-    return keywords_by_proj
-
-
-# @app.route('/keywords_centrality', cors=True)
-# def keywords_centrality():
-#     params = app.current_request.query_params or {}
-#     print(params)
-#     jira_server_name = params.get('jira_server_name')
-#     api_key = params.get('api_key')
-#     validate_params(jira_server_name, api_key)
-#
-#     projects = params.get('projects')
-#     projects_list = projects.split(',') if projects else []
-#     keywords_by_proj = get_keywords_centrality(jira_server_name, projects_list)
-#
-#     return keywords_by_proj
-
-
-def get_keywords(jira_server_name, projects, date_range_arg):
-    keywords_by_proj = {}
-    keywords_by_proj_sorted = {}
-    project_keys = {}
-    ddb = DDB()
-    attributes_to_get = 'keywords,updated,project_name'
-    for project_key in projects:
-        keywords_by_proj[project_key] = {}
-        server_project_key = "{}_{}".format(jira_server_name, project_key)
-        key = Key('server_project_key').eq(server_project_key)
-        for issues in ddb.query(ddb.issues_with_keywords_table_name, key, attributes_to_get):
-            for issue in issues:
-                if date_range_arg:
-                    updated = datetime.strptime(issue['updated'].split('T')[0], '%Y-%m-%d')
-                    oldest_date = datetime.now() + relativedelta(**date_range_arg)
-                    if updated < oldest_date:
-                        continue
-
-                for keyword in issue['keywords']:
-                    if keyword in KEYWORDS_EXCLUDE:
-                        continue
-                    keywords_by_proj[project_key].setdefault(keyword, 0)
-                    keywords_by_proj[project_key][keyword] += int(issue['keywords'][keyword])
-
-                if project_key not in project_keys:
-                    project_keys[project_key] = issue['project_name']
-
-        keywords_by_proj_sorted[project_key] = {
-            'project_name': project_keys.get(project_key, ''),
-            'keywords': {}
-        }
-        keywords_sorted = sorted(keywords_by_proj[project_key].items(), key=lambda x: x[1], reverse=True)[:10]
-        for keyword, count in keywords_sorted:
-            keywords_by_proj_sorted[project_key]['keywords'][keyword] = count
-
-    return keywords_by_proj_sorted
-
-
-def get_keywords_scan(jira_server_name, date_range_arg):
-    keywords_by_proj = {}
-    keywords_by_proj_sorted = {}
-    project_keys = {}
-    ddb = DDB()
-    attributes_to_get = 'project_key,project_name,jira_server_name,keywords,updated'
-    for issues in ddb.scan(ddb.issues_with_keywords_table_name, attributes_to_get):
-        for issue in issues:
-            if jira_server_name != issue['jira_server_name']:
-                continue
-
-            if date_range_arg:
-                updated = datetime.strptime(issue['updated'].split('T')[0], '%Y-%m-%d')
-                oldest_date = datetime.now() + relativedelta(**date_range_arg)
-                if updated < oldest_date:
-                    continue
-
-            project_key = issue['project_key']
-            project_name = issue['project_name']
-            if project_key not in project_keys:
-                project_keys[project_key] = project_name
-            keywords_by_proj.setdefault(project_key, {})
-            for keyword in issue['keywords']:
-                if keyword in KEYWORDS_EXCLUDE:
-                    continue
-                keywords_by_proj[project_key].setdefault(keyword, 0)
-                keywords_by_proj[project_key][keyword] += int(issue['keywords'][keyword])
-
-    for project_key in keywords_by_proj:
-        keywords_by_proj_sorted[project_key] = {
-            'project_name': project_keys[project_key],
-            'keywords': {}
-        }
-        keywords_sorted = sorted(keywords_by_proj[project_key].items(), key=lambda x: x[1], reverse=True)[:10]
-        for keyword, count in keywords_sorted:
-            keywords_by_proj_sorted[project_key]['keywords'][keyword] = count
-
-    return keywords_by_proj_sorted
-
-
-def get_keywords_centrality(jira_server_name, projects):
-    graph_results_by_proj = {}
-    network_data_by_proj = {}
-
-    ddb = DDB()
-    attributes_to_get = 'project_name,jira_server_name,keywords'
-    for issues in ddb.scan(ddb.issues_with_keywords_table_name, attributes_to_get):
-        for issue in issues:
-            if jira_server_name != issue['jira_server_name']:
-                continue
-
-            project_name = issue['project_name']
-            if projects and project_name not in projects:
-                continue
-
-            network_data_by_proj.setdefault(project_name, {'edges': {}, 'nodes': {}})
-            keywords_dict = {}
-            for keyword, count in issue['keywords'].items():
-                if keyword in KEYWORDS_EXCLUDE:
-                    continue
-                keywords_dict[keyword] = int(count)
-            network_data_by_proj[project_name] = network_utils.fn_create_overall_indedges(keywords_dict, network_data_by_proj[project_name])
-
-    for project, network_data in network_data_by_proj.items():
-        graph_results_by_proj[project] = network_utils.old_fn_create_complete_network(network_data)
-
-    return graph_results_by_proj
-
-
-def get_date_range_arg(date_range):
-    if date_range == '1w':
-        date_range_arg = {'weeks': -1}
-    elif date_range == '1m':
-        date_range_arg = {'months': -1}
-    elif date_range == '3m':
-        date_range_arg = {'months': -3}
-    elif date_range == '6m':
-        date_range_arg = {'months': -6}
-    elif date_range == '1y':
-        date_range_arg = {'years': -1}
-    else:
-        date_range_arg = {}
-    return date_range_arg
-
-
 def validate_params(jira_server_name, api_key):
     if not jira_server_name:
         raise BadRequestError("'jira_server_name' is required.")
     if not api_key:
         raise BadRequestError("'api_key' was not provided.")
-    if not validate_api_key(jira_server_name, api_key):
-        raise UnauthorizedError("'api_key' ia valid")
+    if not validate_api_key(api_key):
+        raise UnauthorizedError("'api_key' is not valid")
 
 
-def validate_api_key(jira_server_name, api_key):
-    return True
+def validate_api_key(api_key):
+    return api_key == VALID_API_KEY
+
