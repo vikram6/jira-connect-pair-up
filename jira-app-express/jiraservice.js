@@ -1,7 +1,8 @@
 import { config, SQS } from "aws-sdk";
 config.update({ region: "us-east-1" });
 var sqs = new SQS();
- 
+
+
 const queueUrl = "https://sqs.us-east-1.amazonaws.com/525499439414/atlassian-sqs-lambda-stack-JiraIssuesQueue-P4C0OWB4UO8";
 
 const issueFields = "comment,project,priority,labels,status,summary,description,created,updated,timespent,issuetype,assignee,reporter";

@@ -93,7 +93,7 @@ routes(app, addon , cors);
 // Boot the HTTP server
 http.createServer(app).listen(port, () => {
   console.log('App server running at https://' + os.hostname() + ':' + port);
-  console.log(process.env["JIRAAPIGWKEY"]);
+  
   // Enables auto registration/de-registration of app into a host in dev mode
   if (devEnv) addon.register();
 });

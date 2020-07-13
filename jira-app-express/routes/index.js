@@ -5,7 +5,7 @@ import { putCreatedOrUpdatedIssueOnTheQueue } from '../jiraservice';
 import { getJiraServerInfo } from '../jiraservice';
 import { runInNewContext } from 'vm';
 import got from 'got';
-
+import process from 'process';
 
 // [
 //     { group: "A", value: 7 },
@@ -89,8 +89,12 @@ export default function routes(app, addon, cors) {
         (async () => {
             try {
                 const serverName = await getJiraServerInfo(httpClient);
-
-                const response = await got('https://941yp9qwxc.execute-api.us-east-1.amazonaws.com/api/related_users?jira_server_name=' + serverName + '&api_key=foo&project_key=' + projectKey + '&issue_key=' + issueKey);
+                const apiKey = process.env["JIRAAPIGWKEY"];
+                const url = 'https://941yp9qwxc.execute-api.us-east-1.amazonaws.com/api/related_users?jira_server_name=' + serverName + '&api_key='+apiKey+'&project_key=' + projectKey + '&issue_key=' + issueKey;
+                console.log("----URL-----")
+                console.log(url);
+                console.log("----URL-----")
+                const response = await got(url);
 
                 let resp = JSON.parse(response.body)
                 res.json(resp);
