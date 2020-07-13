@@ -3,7 +3,6 @@
 import hashlib
 import json
 from decimal import Decimal
-from datetime import datetime
 
 from utils import watson_utils
 from utils.ddb_service import DDB
