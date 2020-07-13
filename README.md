@@ -1,4 +1,3 @@
-# jira-connect-pair-up
 Pair Up is an Atlassian Connect app that helps you solve your JIRA issues more efficiently by connecting you with people in your company who have worked on similar issues in the past.
 
 ## How it works
