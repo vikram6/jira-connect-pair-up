@@ -66,7 +66,7 @@
       $.get("/import-issues?jwt={{token}}&projectId=" + projectId, function (response) {   
             
       });
-      setInterval(function(){ 
+      setTimeout(function(){ 
         var myFlag = AJS.flag({
             type: 'success',
             body: 'We started importing issues of the project, check back or click the refresh button in few mins.',
