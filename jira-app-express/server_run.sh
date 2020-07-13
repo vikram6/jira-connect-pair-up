@@ -4,6 +4,11 @@
 
 sed -i "s/<IP_HERE>/$(curl http://169.254.169.254/latest/meta-data/public-ipv4)/" config.json
 
+jiraapigwkey=$(aws ssm get-parameter --name "jiraapigwkey" --query "Parameter.Value" --output text)
+
+export JIRAAPIGWKEY=$jiraapigwkey
+
+
 kill $(cat PID)
 killall ngrok
 
