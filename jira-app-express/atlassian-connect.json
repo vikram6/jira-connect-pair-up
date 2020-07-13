@@ -1,7 +1,7 @@
 {
-    "key": "my-app",
-    "name": "My app",
-    "description": "My very first app",
+    "key": "pair-up",
+    "name": "Pair Up",
+    "description": "Find the right expert.",
     "baseUrl": "{{localBaseUrl}}",
     "authentication": {
         "type": "jwt"
