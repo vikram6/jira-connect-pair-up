@@ -8,7 +8,7 @@ from datetime import datetime
 from utils import watson_utils
 from utils.ddb_service import DDB
 
-WATSON_RELEVANCE_MINIMUM = 0.6
+WATSON_RELEVANCE_MINIMUM = 0.4
 
 
 def lambda_handler(event, context):
