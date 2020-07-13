@@ -62,11 +62,12 @@
     AP.context.getContext(function (response) {
       console.log(response["jira"]["project"]);
       var projectId = response["jira"]["project"]["id"];
-      var myFlag = AJS.flag({
+      
+      $.get("/import-issues?jwt={{token}}&projectId=" + projectId, function (response) {   
+        var myFlag = AJS.flag({
             type: 'success',
             body: 'We started importing issues of the project, check back or click the refresh button in few mins.',
-        });
-      $.get("/import-issues?jwt={{token}}&projectId=" + projectId, function (response) {          
+        });       
       });
     });
   }

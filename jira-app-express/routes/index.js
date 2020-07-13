@@ -156,10 +156,11 @@ export default function routes(app, addon, cors) {
         let project_promises = [];
         const startAt = 0;
         const projectId = req.query.projectId
+        console.log("-- RUNNING IMPORT ISSUES FOR "+projectId+" --")
         project_promises.push(loadProjectIssues(httpClient, projectId, startAt))
 
         Promise.all(project_promises).then(values => {
-            console.log("IMPORT COMPLETE FOR "+projectId);
+            console.log("IMPORT ISSUES COMPLETE FOR "+projectId);
             res.json({
                 "execution-success": "true"
             });
