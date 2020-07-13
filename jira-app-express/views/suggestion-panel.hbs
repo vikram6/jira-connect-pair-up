@@ -64,11 +64,13 @@
       var projectId = response["jira"]["project"]["id"];
       
       $.get("/import-issues?jwt={{token}}&projectId=" + projectId, function (response) {   
-        var myFlag = AJS.flag({
+            
+      });
+
+      var myFlag = AJS.flag({
             type: 'success',
             body: 'We started importing issues of the project, check back or click the refresh button in few mins.',
-        });       
-      });
+        });   
     });
   }
   function getIssueGlanceData() {
