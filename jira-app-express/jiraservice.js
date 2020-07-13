@@ -1,4 +1,4 @@
-import { config, SQS } from "aws-sdk";
+import { config, SQS, CloudFormation } from "aws-sdk";
 config.update({ region: "us-east-1" });
 var sqs = new SQS();
 
@@ -26,7 +26,9 @@ const getProjects = (httpClient) => {
 
 
 const loadProjectIssues = (httpClient, projectId , startAt) => {
-    
+    console.log("------ project id ,  startAt ------");
+    console.log( projectId , startAt);
+    console.log("------ project id ,  startAt ------");
     return new Promise((resolve, reject) => {
         
         httpClient.get('/rest/api/2/search?jql=project=' + projectId + '&startAt=' + startAt + '&maxResults=' + maxResults + '&fields=' + issueFields, function (err, response, body) {
