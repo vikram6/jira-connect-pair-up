@@ -91,9 +91,7 @@ export default function routes(app, addon, cors) {
                 const serverName = await getJiraServerInfo(httpClient);
                 const apiKey = process.env["JIRAAPIGWKEY"];
                 const url = 'https://941yp9qwxc.execute-api.us-east-1.amazonaws.com/api/related_users?jira_server_name=' + serverName + '&api_key='+apiKey+'&project_key=' + projectKey + '&issue_key=' + issueKey;
-                console.log("----URL-----")
-                console.log(url);
-                console.log("----URL-----")
+                
                 const response = await got(url);
 
                 let resp = JSON.parse(response.body)
@@ -151,9 +149,9 @@ export default function routes(app, addon, cors) {
 
     });
 
-    app.get('/execute-full-load-for-project', addon.checkValidToken(), (req, res) => {
+    app.get('/import-issues', addon.checkValidToken(), (req, res) => {
         var httpClient = addon.httpClient(req);
-
+        
         
         let project_promises = [];
         const startAt = 0;
@@ -161,6 +159,7 @@ export default function routes(app, addon, cors) {
         project_promises.push(loadProjectIssues(httpClient, projectId, startAt))
 
         Promise.all(project_promises).then(values => {
+            console.log("IMPORT COMPLETE FOR "+projectId);
             res.json({
                 "execution-success": "true"
             });
@@ -205,25 +204,6 @@ export default function routes(app, addon, cors) {
     });
 
 
-
-    //THIS IS TO TEST LOCALLY
-    app.get('/public-page', (req, res) => {
-        // Rendering a template is easy; the render method takes two params:
-        // name of template and a json object to pass the context in.
-
-        const projects = [{ "expand": "description,lead,issueTypes,url,projectKeys,permissions,insight", "self": "https://diversegorgon.atlassian.net/rest/api/2/project/10000", "id": "10000", "key": "MYF", "name": "MyFirstProduct", "avatarUrls": { "48x48": "https://diversegorgon.atlassian.net/secure/projectavatar?pid=10000&avatarId=10405", "24x24": "https://diversegorgon.atlassian.net/secure/projectavatar?size=small&s=small&pid=10000&avatarId=10405", "16x16": "https://diversegorgon.atlassian.net/secure/projectavatar?size=xsmall&s=xsmall&pid=10000&avatarId=10405", "32x32": "https://diversegorgon.atlassian.net/secure/projectavatar?size=medium&s=medium&pid=10000&avatarId=10405" }, "projectTypeKey": "software", "simplified": true, "style": "next-gen", "isPrivate": false, "properties": {}, "entityId": "4ba4fb15-e846-4fdb-b8c5-6758b67b1178", "uuid": "4ba4fb15-e846-4fdb-b8c5-6758b67b1178" }, { "expand": "description,lead,issueTypes,url,projectKeys,permissions,insight", "self": "https://diversegorgon.atlassian.net/rest/api/2/project/10001", "id": "10001", "key": "AH", "name": "Atlassian Hackathon", "avatarUrls": { "48x48": "https://diversegorgon.atlassian.net/secure/projectavatar?pid=10001&avatarId=10418", "24x24": "https://diversegorgon.atlassian.net/secure/projectavatar?size=small&s=small&pid=10001&avatarId=10418", "16x16": "https://diversegorgon.atlassian.net/secure/projectavatar?size=xsmall&s=xsmall&pid=10001&avatarId=10418", "32x32": "https://diversegorgon.atlassian.net/secure/projectavatar?size=medium&s=medium&pid=10001&avatarId=10418" }, "projectTypeKey": "software", "simplified": false, "style": "classic", "isPrivate": false, "properties": {} }, { "expand": "description,lead,issueTypes,url,projectKeys,permissions,insight", "self": "https://diversegorgon.atlassian.net/rest/api/2/project/10002", "id": "10002", "key": "TJS", "name": "MyThreeJSClone", "avatarUrls": { "48x48": "https://diversegorgon.atlassian.net/secure/projectavatar?pid=10002&avatarId=10404", "24x24": "https://diversegorgon.atlassian.net/secure/projectavatar?size=small&s=small&pid=10002&avatarId=10404", "16x16": "https://diversegorgon.atlassian.net/secure/projectavatar?size=xsmall&s=xsmall&pid=10002&avatarId=10404", "32x32": "https://diversegorgon.atlassian.net/secure/projectavatar?size=medium&s=medium&pid=10002&avatarId=10404" }, "projectTypeKey": "business", "simplified": false, "style": "classic", "isPrivate": false, "properties": {} }, { "expand": "description,lead,issueTypes,url,projectKeys,permissions,insight", "self": "https://diversegorgon.atlassian.net/rest/api/2/project/10005", "id": "10005", "key": "MF", "name": "MyFireCrackerClone", "avatarUrls": { "48x48": "https://diversegorgon.atlassian.net/secure/projectavatar?pid=10005&avatarId=10411", "24x24": "https://diversegorgon.atlassian.net/secure/projectavatar?size=small&s=small&pid=10005&avatarId=10411", "16x16": "https://diversegorgon.atlassian.net/secure/projectavatar?size=xsmall&s=xsmall&pid=10005&avatarId=10411", "32x32": "https://diversegorgon.atlassian.net/secure/projectavatar?size=medium&s=medium&pid=10005&avatarId=10411" }, "projectTypeKey": "software", "simplified": false, "style": "classic", "isPrivate": false, "properties": {} }]
-
-        const projectsFromDDb = getProjectsFromDDb()
-        projectsFromDDb.then(function (items) {
-            res.render('public', {
-                title: 'Test Project Analysis',
-                projects: projects
-
-                //issueId: req.query['issueId']
-            });
-        });
-
-    });
 
     //SAMPLE TO TEST OUT AJAX REQUEST
     app.get('/test', cors(), (req, res, next) => {

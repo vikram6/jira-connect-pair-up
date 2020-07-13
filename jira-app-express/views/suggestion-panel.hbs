@@ -26,7 +26,7 @@
       
       <div class="btn-group" role="group" style="width : 98%;" >
         <button type="button" onClick="getIssueGlanceData();" class="aui-button" style="width: 49%;"><span class="aui-icon aui-icon-small aui-iconfont-refresh"></span> Refresh</button>
-        <button id="import-issues-tooltip" type="button" onClick="executeFullLoad();" class="aui-button" style="width: 49%;" title="Click if you are importing issues for the first time."> <span class="aui-icon aui-icon-small aui-iconfont-download"></span> Import Issues</button>
+        <button id="import-issues-tooltip" type="button" onClick="importIssues();" class="aui-button" style="width: 49%;" title="Click if you are importing issues for the first time."> <span class="aui-icon aui-icon-small aui-iconfont-download"></span> Import Issues</button>
       </div>
       <br><br>
       <div class="d-flex justify-content-center">
@@ -58,14 +58,16 @@
     getIssueGlanceData();
   });
 
-  function executeFullLoad (){
+  function importIssues() {
     AP.context.getContext(function (response) {
       console.log(response["jira"]["project"]);
-      var projectKey = response["jira"]["project"]["key"];
+      var projectId = response["jira"]["project"]["id"];
       var myFlag = AJS.flag({
-        type: 'success',
-        body: 'We started the analysis of the project, check back or click the refresh button in few mins.',
-     });
+            type: 'success',
+            body: 'We started importing issues of the project, check back or click the refresh button in few mins.',
+        });
+      $.get("/import-issues?jwt={{token}}&projectId=" + projectId, function (response) {          
+      });
     });
   }
   function getIssueGlanceData() {
