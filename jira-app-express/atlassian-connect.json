@@ -1,7 +1,7 @@
 {
     "key": "pair-up",
     "name": "Pair Up",
-    "description": "Find the right expert.",
+    "description": "Pair Up helps remote teams address their JIRA issues efficiently by leveraging tribal knowledge held within their organization.",
     "baseUrl": "{{localBaseUrl}}",
     "authentication": {
         "type": "jwt"
