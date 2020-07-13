@@ -1,0 +1,31 @@
+{{!< layout}} 
+<header class="aui-page-header">
+  <div class="aui-page-header-inner">
+    <div class="aui-page-header-main intro-header">
+      <h1>{{title}}</h1>
+    </div>
+  </div>
+  <script src="https://d3js.org/d3.v4.js"></script>
+
+  <!-- Add 2 buttons -->
+
+
+
+  </header>
+  
+  <div class="aui-page-panel main-panel">
+    <div class="aui-page-panel-inner">
+      <section class="aui-page-panel-item">
+        <div class="aui-group">
+          <div class="aui-item">
+            {{#each projects}}
+              <button type="button" class="btn btn-outline-primary" onclick="update(data{{@index}})">{{this.name}}</button>              
+            {{/each}}
+            <a href="/hello-world?jwt={{token}}">Go home</a>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  

@@ -1,0 +1,23 @@
+
+
+.project-tile {
+    width: 150px !important;
+    height: 150px !important;
+    margin: 1% !important;
+  } 
+
+  .tile-name {
+    font-size: large;
+  }
+
+  .refresh-right {
+    position: absolute;
+    right: 20px;    
+  }
+  
+  .avatar-buddy-up {
+    border-radius: 50% !important;
+    max-width: 80px !important;
+    max-height: 80px !important;
+    margin-top: 7% !important;
+  }

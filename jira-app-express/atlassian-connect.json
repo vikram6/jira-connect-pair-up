@@ -1,0 +1,87 @@
+{
+    "key": "my-app",
+    "name": "My app",
+    "description": "My very first app",
+    "baseUrl": "{{localBaseUrl}}",
+    "authentication": {
+        "type": "jwt"
+    },
+    "lifecycle": {
+        "installed": "/installed"
+    },
+    "scopes": [
+        "READ"
+    ],
+    "modules": {
+        "generalPages": [
+            {
+                "key": "hello-world-page-jira",
+                "location": "system.top.navigation.bar",
+                "name": {
+                    "value": "Hello World"
+                },
+                "url": "/hello-world",
+                "conditions": [{
+                    "condition": "user_is_logged_in"
+                }]
+            },
+            {
+                "key": "hello-world-page-confluence",
+                "location": "system.header/left",
+                "name": {
+                    "value": "Hello World"
+                },
+                "url": "/hello-world",
+                "conditions": [{
+                    "condition": "user_is_logged_in"
+                }]
+            }
+        ],
+        "webhooks": [
+            {
+              "event": "jira:issue_created",
+              "url": "/issue-created-updated?issue={issue.key}"
+            },
+            {
+                "event": "jira:issue_updated",
+                "url": "/issue-created-updated?issue={issue.key}"
+            },
+            {
+                "event": "jira:project_deleted",
+                "url": "/project-deleted?project={project.key}"
+            }            
+          ],
+          "jiraIssueGlances": [
+            {
+              "icon": {
+                "width": 0,
+                "height": 0,
+                "url": "users.svg"
+              },
+              "status": {
+                "type": "badge",
+                "params": {
+                  "entity": "issue",
+                  "propertyKey": "my.object.links",
+                  "objectName": "count"
+                }
+                },
+              "content": {
+                "type": "label",
+                "label": {
+                  "value": "Find me an expert"
+                }
+              },
+              "target": {
+                "type": "web_panel",
+                "url": "/suggestion-panel"
+              },
+              "jiraNativeAppsEnabled": false,
+              "name": {
+                "value": "Pair Up"
+              },
+              "key": "my-issue-glance"
+            }
+          ]
+    }
+}

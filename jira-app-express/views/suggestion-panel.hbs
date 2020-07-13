@@ -1,0 +1,129 @@
+{{!< layout}} 
+<header>
+  
+  {{!-- <script src="https://d3js.org/d3.v4.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+   --}}
+
+</header>
+
+  <body>
+  
+  
+  
+    <div class="ac-content">
+      {{!-- CODE FOR EXECUTE LOAD--}} {{!--
+      <div>
+        <button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#demo">Simple collapsible</button>
+        <div id="demo" class="collapse">
+          <button type="button" class="btn btn-outline-success" onclick="executeFullLoad()">Load issues</button>
+        </div>
+      </div>
+      <br>
+      <br> --}}
+      
+      
+      <div class="btn-group" role="group" style="width : 98%;" >
+        <button type="button" onClick="getIssueGlanceData();" class="aui-button" style="width: 49%;"><span class="aui-icon aui-icon-small aui-iconfont-refresh"></span> Refresh</button>
+        <button id="import-issues-tooltip" type="button" onClick="executeFullLoad();" class="aui-button" style="width: 49%;" title="Click if you are importing issues for the first time."> <span class="aui-icon aui-icon-small aui-iconfont-download"></span> Import Issues</button>
+      </div>
+      <br><br>
+      <div class="d-flex justify-content-center">
+        <div class="spinner-border buddy-spinner" role="status">
+          <span class="sr-only"></span>
+        </div>
+      </div>
+    
+      <div>
+        <div id="keywords" class="alert alert-light" role="alert" style="width : 98%;"><b>Top Keywords</b>&nbsp;</div>
+        <br>
+        <div id="sugesstion"></div>
+      </div>
+    
+    </div>
+  
+  
+  
+  
+  
+  
+  </body>
+
+<script type="text/javascript">
+  
+  AJS.$("#import-issues-tooltip").tooltip();
+
+  AP.events.on('ISSUE_GLANCE_OPENED', function () {
+    getIssueGlanceData();
+  });
+
+  function executeFullLoad (){
+    AP.context.getContext(function (response) {
+      console.log(response["jira"]["project"]);
+      var projectKey = response["jira"]["project"]["key"];
+      var myFlag = AJS.flag({
+        type: 'success',
+        body: 'We started the analysis of the project, check back or click the refresh button in few mins.',
+     });
+    });
+  }
+  function getIssueGlanceData() {
+      $("#sugesstion").empty();
+      
+      $("#keywords").hide();
+
+      $(".buddy-spinner").show();
+      AP.context.getContext(function (response) {
+        var issueKey = response["jira"]["issue"]["key"];
+        var projectKey = response["jira"]["project"]["key"];
+
+        $.get("/suggested-users?jwt={{token}}&projectKey=" + projectKey + "&issueKey=" + issueKey, function (response) {
+
+          $(".buddy-spinner").hide();
+
+          let suggestedUsers = response.assignees;
+
+          var htmlString = "";
+          var htmlKeywordsString = "<p>Top Keywords</p>";
+
+          console.log("NUMBER OF BUDDIES FOUND")
+          console.log(suggestedUsers.length);
+          console.log("NUMBER OF BUDDIES FOUND")
+
+          for (let i = 0; i < suggestedUsers.length; i++) {
+
+            //htmlString = htmlString + '<div class="card bg-light mb-3" style="max-width: 18rem;"><div class="card-header">' + suggestedUsers[i].assignee + '</div>        <div class="card-body //text-info"><p class="card-text"><a href="' + suggestedUsers[i].issues_url + '" target="_blank" class="aui-button" aria-pressed="true">Related issues</a> </p></div> </div> <br><br>'
+
+
+
+            htmlString = htmlString +
+            '<div class="card mb-3" style="max-width: 18rem; margin-left : 12%;" >  <div class="row no-gutters"> <div class="col-sm-4"><span class="aui-avatar-inner"><img class="avatar-buddy-up" src="'+
+            suggestedUsers[i].assignee_account_avatar +
+            '" > </span> </div>    <div class="col-md-8">      <div class="card-body">  <div>      <h5 class="card-title" style="margin-left: 20%;"><a href="' +
+            suggestedUsers[i].assignee_account_url+
+            '" target="_blank">' + suggestedUsers[i].assignee + '</a> <span class="aui-icon aui-icon-small aui-iconfont-email"></span></h5></div> <div> <h5 class="card-title" style="margin-left: 20%;"> <a href="' + suggestedUsers[i].issues_url+'" target="_blank" class="aui-button aui-button-primary" ><span class="badge badge-light">'+suggestedUsers[i].issues.length+' </span> &nbsp; related issues </a>  </h5> </div>'+
+            '</div></div></div></div>' +
+            '<br>'
+          
+
+            
+          }
+
+          
+
+          for (let j= 0 ; j < response.keywords.length ; j++){
+            htmlKeywordsString = htmlKeywordsString + '<span class="aui-lozenge aui-lozenge-current">'+response.keywords[j]+'</span> &nbsp;'
+          }
+
+          
+
+          $("#sugesstion").html(htmlString);
+          $("#keywords").show();
+          $("#keywords").html(htmlKeywordsString);
+        });
+      });
+    }
+
+
+</script>

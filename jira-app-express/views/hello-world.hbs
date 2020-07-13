@@ -1,0 +1,86 @@
+{{!< layout}} 
+<header class="aui-page-header">
+  
+  <div class="aui-page-header-inner">
+    <div class="aui-page-header-main intro-header">
+      <h1>{{title}}</h1>
+    </div>
+  </div>
+  <script src="https://d3js.org/d3.v4.js"></script>
+
+  <!-- Add 2 buttons -->
+
+
+
+</header>
+
+  <body>
+    <div class="aui-page-panel main-panel">
+      <div class="aui-page-panel-inner">
+        <section class="aui-page-panel-item">
+          <div class="aui-group">
+            <div class="aui-item">
+              <button type="button" class="btn btn-outline-success" onclick="executeFullLoad()">Start background load</button>
+            </div>
+            <div class="aui-item">
+              <!-- Create a div where the graph will take place -->
+              
+              {{!-- <a href="/project-details?jwt={{token}}&key=PAN&name=Pantelligent">execute load </a>  --}}
+              {{#each projects}}
+                <button type="button" class="aui-button aui-button-primary project-tile" onclick=update('{{this.key}}') > {{this.name}} </button>
+              {{/each}}
+              
+              
+
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script>
+      // A function that create / update the plot for a given variable:
+      //var decodedJson = decodeURIComponent({{{projectStrings}}});
+      //var projects = decodedJson;
+
+      
+      //const projectsMap =  {}
+
+      //for(var i =0 ; i < projects.length ; i++){
+        //console.log(projects[i])
+      //  projectsMap[projects[i].key] = projects[i].name
+     // }
+      
+      //console.log(projectsMap);
+
+      function update(projectKey) {
+          //let projectName = projectsMap[projectKey];
+          //console.log(projectName);
+          window.location.href = "/project-details?jwt={{token}}&key="+projectKey;
+      } 
+
+      function executeFullLoad() {
+
+        var jqxhr = $.get("/execute-full-load?jwt={{token}}", function () {
+          alert("LOAD COMPLETE");
+        })
+          .fail(function () {
+            alert("error");
+          })
+          .always(function () {
+            // alert("finished");
+          });
+
+        //$.get("/execute-full-load?jwt={{token}}", function (data) {
+        // alert("Load was performed.");
+        //});
+
+      }
+
+
+      
+
+      
+    </script>
+
+  </body>

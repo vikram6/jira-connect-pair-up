@@ -1,0 +1,172 @@
+{{!< layout}} 
+<header class="aui-page-header">
+  <div class="aui-page-header-inner">
+    <div class="aui-page-header-main intro-header">
+      <h1>{{title}}</h1>
+    </div>
+  </div>
+  <script src="https://d3js.org/d3.v4.js"></script>
+
+  <!-- Add 2 buttons -->
+
+
+
+</header>
+
+  <body>
+    <div class="aui-page-panel main-panel">
+      <div class="aui-page-panel-inner">
+        <section class="aui-page-panel-item">
+          <div class="aui-group">
+            {{!-- <div class="aui-item">
+              <button type="button" class="btn btn-outline-success" onclick="executeFullLoad()">Start background load</button>
+            </div> --}}
+            <div class="aui-item">
+              <!-- Create a div where the graph will take place -->
+              {{!--
+              <a href="/execute-full-load?jwt={{token}}">execute load</a> --}} 
+              {{#each projects}}
+              <button type="button" class="aui-button aui-button-primary" onclick=update("{{this}}")>{{this}}</button>
+              {{/each}}
+              
+              <div id="my_dataviz"></div>
+
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script>
+      // A function that create / update the plot for a given variable:
+      
+      var decodedJson = decodeURIComponent("{{{projectData}}}");
+      var projectData = JSON.parse(decodedJson);
+      var projects = Object.keys(projectData)
+
+      console.log(projects);
+
+      function myFunction(p) {
+          alert(p);
+        }
+      function executeFullLoad() {
+
+        var jqxhr = $.get("/execute-full-load?jwt={{token}}", function () {
+          alert("LOAD COMPLETE");
+        })
+          .fail(function () {
+            alert("error");
+          })
+          .always(function () {
+            // alert("finished");
+          });
+
+        //$.get("/execute-full-load?jwt={{token}}", function (data) {
+        // alert("Load was performed.");
+        //});
+
+      }
+
+
+      var data0 = [
+        { group: "A", value: 4 },
+        { group: "B", value: 16 },
+        { group: "C", value: 8 }
+      ];
+
+      var data1 = [
+        { group: "A", value: 7 },
+        { group: "B", value: 1 },
+        { group: "C", value: 20 },
+        { group: "D", value: 10 }
+      ];
+
+      var data2 = [
+        { group: "A", value: 4 },
+        { group: "B", value: 16 },
+        { group: "C", value: 8 }
+      ];
+
+      var data3 = [
+        { group: "A", value: 7 },
+        { group: "B", value: 1 },
+        { group: "C", value: 20 },
+        { group: "D", value: 10 }
+      ];
+
+      // set the dimensions and margins of the graph
+      var margin = { top: 30, right: 30, bottom: 70, left: 60 },
+        width = 1500 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom;
+
+      // append the svg object to the body of the page
+      var svg = d3.select("#my_dataviz")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+      // Initialize the X axis
+      var x = d3.scaleBand()
+        .range([0, width])
+        .padding(0.2);
+      var xAxis = svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+
+      // Initialize the Y axis
+      var y = d3.scaleLinear()
+        .range([height, 0]);
+      var yAxis = svg.append("g")
+        .attr("class", "myYaxis")
+
+
+      // A function that create / update the plot for a given variable:
+      function update(project) {
+        // Update the X axis
+        let data = projectData[project]
+
+        x.domain(data.map(function (d) { return d.group; }))
+        xAxis.call(d3.axisBottom(x))
+
+        // Update the Y axis
+        y.domain([0, d3.max(data, function (d) { return d.value })]);
+        yAxis.transition().duration(1000).call(d3.axisLeft(y));
+
+        // Create the u variable
+        var u = svg.selectAll("rect")
+          .data(data)
+
+
+        u
+          .enter()
+          .append("rect") // Add a new rect for each new elements
+          .merge(u) // get the already existing elements as well
+          .transition() // and apply changes to all of them
+          .duration(1000)
+          .attr("x", function (d) { return x(d.group); })
+          .attr("y", function (d) { return y(d.value); })
+          .attr("width", x.bandwidth())
+          .attr("height", function (d) { return height - y(d.value); })
+          .attr("fill", "#69b3a2")
+
+        // If less group in the new dataset, I delete the ones not in use anymore
+        u
+          .exit()
+          .remove()
+
+        svg.selectAll("text")	
+        .style("text-anchor", "end")
+        .attr("dx", "-.15em")
+        .attr("transform", "rotate(-90)");
+
+
+      }
+
+      // Initialize the plot with the first dataset
+      update(projects[0])
+
+    </script>
+
+  </body>
